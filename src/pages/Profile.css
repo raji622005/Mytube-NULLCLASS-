@@ -1,0 +1,66 @@
+.avatar2{
+    width: 200px;
+    height:200px;
+    margin-top: 50px;
+}
+.profiles{
+    padding-left:30px;
+}
+.avatar3{
+    width:400px;
+    height:200px;
+}
+.names{
+    margin-left:55px;
+    
+}
+.bttn h4{
+    padding:2px;
+   
+}
+.btn-clear{
+    color:white;
+    background-color: red;
+    border-radius: 5px;
+    padding: 4px;
+}
+.btn1, .btn2,.btn3,.btn4{
+    margin-left: 15px;
+    border :1px solid black;
+    padding:5px;
+    color:black;
+}
+.btn1:hover,.btn2:hover,.btn3:hover,.btn4:hover{
+    border:1px solid blue;
+    color:lightblue;
+    background-color: black;
+}
+.details{
+    color:lightskyblue;
+    margin-top:80px;
+}
+.bttnn{
+    padding:5px;
+    border:1px solid black;
+    color:black;
+    
+}
+.bttnn:hover{
+    padding:5px;
+    border:1px solid lightblue;
+    color:lightblue;
+}
+@media (max-width: 768px){
+.avatar2{
+    width: 50px;
+    height:50px;
+    margin-top: 40px;
+}
+}
+@media (max-width: 480px) {
+.avatar2{
+    width: 50px;
+    height:50px;
+    margin-top: 40px;
+}
+}

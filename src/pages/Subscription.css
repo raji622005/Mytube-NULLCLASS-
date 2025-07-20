@@ -1,0 +1,90 @@
+.subscription-container {
+  padding: 1rem;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.subscription-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #0f0f0f;
+}
+
+.txt {
+  font-size: 14px;
+  color: #606060;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.subscription-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.subscribed-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.subscribed-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.subscribed-card h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #030303;
+}
+
+.subscribed-card p {
+  font-size: 14px;
+  color: #606060;
+  margin: 0 0 12px;
+}
+
+.unsubscribe-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.unsubscribe-btn:hover {
+  background-color: #a80000;
+}
+
+@media (max-width: 480px) {
+  .subscription-heading {
+    font-size: 16px;
+  }
+
+  .subscription-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subscribed-card h3 {
+    font-size: 15px;
+  }
+
+  .subscribed-card p {
+    font-size: 13px;
+  }
+
+  .unsubscribe-btn {
+    width: 100%;
+  }
+}

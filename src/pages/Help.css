@@ -1,0 +1,54 @@
+.help-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  font-family: 'Roboto', sans-serif;
+  color: #0f0f0f;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.soln{
+  font-weight: lighter;
+}
+.help-title {
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 0px;
+}
+
+.help-textarea {
+  width: 300px;
+  height:100px;
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.help-textarea:focus {
+  border-color: #3ea6ff;
+}
+
+.help-submit {
+  align-self: flex-start;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #065fd4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.help-submit:hover {
+  background-color: #0b4cb8;
+}

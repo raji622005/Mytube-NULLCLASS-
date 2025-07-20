@@ -1,0 +1,175 @@
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: px 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: 45px;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  
+}
+ 
+.btnn{
+  margin-bottom: 10px;
+  margin-left: 5px;
+}
+.left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.0rem;
+  padding-left: 0rem;
+  padding-top: 0px;
+  color: #333;
+
+}
+.cls{
+  margin:8px;
+}
+.youtube-brand {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+}
+
+.youtube-brand img {
+  height: 20px;
+  width:40px;
+}
+
+.youtube-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.youtube-name1 {
+  font-size: 0.7rem;
+  color: gray;
+}
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 500px;
+  padding: 0 1rem;
+}
+
+.whole {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.icon1,
+.icon2 {
+  cursor: pointer;
+  font-size: 1.3rem;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.icon1:hover,
+.icon2:hover {
+  color: black;
+}
+
+.icco {
+  width: 36px;
+  height: 36px;
+  background-color: #ddd;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    flex-wrap: nowrap;
+    flex-direction: row;
+  }
+  .toggle-btn{
+    width: 2px;
+  }
+  .youtube-logo{
+    width:1px;
+  }
+  .youtube-name {
+    font-size: 0.9rem;
+    width:1px;
+  }
+
+  .icon1,
+  .icon2 {
+    font-size: 1rem;
+  }
+
+  .icco {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar {
+    padding: 1px 1px;
+  }
+  
+  .youtube-name {
+    font-size: 0.8rem;
+    padding:2px;
+    
+  }
+  .center{
+    margin:15px;
+    padding:10px;
+  }
+  
+  .icon1 {
+    font-size: 0.05rem;
+    margin: 0px 0px;
+  }
+   .icon2 {
+    font-size: 0.02rem;
+    margin: 0px 0px;
+  }
+
+  .icco {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  .btnn{
+    margin-bottom: 10px;
+  }
+  .login-avatar-button{
+    background-color: red;
+
+  }
+  .whole{
+    width:110px;
+  }
+  .avatar{
+    width:25px;
+    height: 25px;
+  }
+  .avatar-image{
+    width:30px;
+    height: 30px;
+  }
+}
