@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createPeer } from './peer.jsx';
+import Peer from './peer.jsx';
 import './VideoCall.css';
 const VideoCall = () => {
   const localVideoRef = useRef();
@@ -13,7 +13,7 @@ const VideoCall = () => {
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
   useEffect(() => {
-    const peer = createPeer();
+    const peer = Peer;
     setMyPeer(peer);
 
     peer.on('open', (id) => {
