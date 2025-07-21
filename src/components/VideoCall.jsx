@@ -7,8 +7,8 @@ const VideoCall = () => {
   const [peerId, setPeerId] = useState('');
   const [myPeer, setMyPeer] = useState(null);
   const [currentCall, setCurrentCall] = useState(null);
-  const peerConnectionRef = useRef(null); // <-- for peerConnection
-  const localStreamRef = useRef(null);    // <-- for localStream
+  const peerConnectionRef = useRef(null); 
+  const localStreamRef = useRef(null);   
   const senderRef = useRef(null);   
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
@@ -125,14 +125,12 @@ const shareScreen = async () => {
 
       if (sender) {
         senderRef.current = sender;
-        await sender.replaceTrack(screenTrack); // use await to ensure replacement happens
-      }
+        await sender.replaceTrack(screenTrack); 
     }
 
-    // Show screen stream locally
     localVideoRef.current.srcObject = screenStream;
 
-    // When user stops screen sharing
+    
     screenTrack.onended = async () => {
       const originalStream = localStreamRef.current;
       const originalVideoTrack = originalStream?.getVideoTracks()[0];
@@ -141,6 +139,7 @@ const shareScreen = async () => {
         await senderRef.current.replaceTrack(originalVideoTrack);
         localVideoRef.current.srcObject = originalStream;
       }
+    }
     };
   } catch (err) {
     console.error("Error sharing screen:", err);
