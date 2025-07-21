@@ -201,6 +201,7 @@ const shareScreen = async () => {
   };
   return (
   <div className="video-call-container">
+    <h3>Reload to Get Peer Id</h3>
     <h2 className="video-call-header">Your Peer ID: {peerId}</h2>
 
     <div className="control-bar">
