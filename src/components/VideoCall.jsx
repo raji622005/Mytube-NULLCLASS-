@@ -13,12 +13,19 @@ const VideoCall = () => {
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
   useEffect(() => {
+    const savedPeerId = sessionStorage.getItem("myPeerId");
+    const savedRemotePeerId = sessionStorage.getItem("remotePeerId");
     const peer = Peer;
     setMyPeer(peer);
 
     peer.on('open', (id) => {
       setPeerId(id);
+      sessionStorage.setItem("myPeerId", id);
       console.log("My Peer ID:", id);
+
+      if (savedRemotePeerId) {
+        callPeer(savedRemotePeerId, peer);
+      }
     });
 
     peer.on('call', (call) => {
@@ -33,6 +40,7 @@ const VideoCall = () => {
           localVideoRef.current.play();
           call.answer(stream);
           setCurrentCall(call);
+          localStreamRef.current = stream;
 
           call.on('stream', (remoteStream) => {
             remoteVideoRef.current.srcObject = remoteStream;
@@ -42,6 +50,7 @@ const VideoCall = () => {
           call.on('close', () => {
             console.log("Call ended");
             remoteVideoRef.current.srcObject = null;
+            sessionStorage.removeItem("remotePeerId");
           });
         })
         .catch((err) => {
@@ -72,7 +81,9 @@ const VideoCall = () => {
         call.on('close', () => {
           console.log("Call ended");
           remoteVideoRef.current.srcObject = null;
+          sessionStorage.removeItem("remotePeerId")
         });
+        sessionStorage.setItem("remotePeerId", idToCall)
       })
       .catch((err) => {
         console.error("Failed to start call:", err);
@@ -103,7 +114,7 @@ const endCall = () => {
       });
       remoteVideoRef.current.srcObject = null;
     }
-
+    sessionStorage.removeItem("remotePeerId"); 
     console.log("✅ Call ended & all media tracks stopped");
   }
 };
