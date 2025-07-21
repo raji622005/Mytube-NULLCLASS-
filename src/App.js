@@ -23,7 +23,7 @@ import Profile from './pages/Profile.jsx';
 import Plans from './pages/Plans.jsx';
 import VideoCall from './components/VideoCall';
 const Layout = ({ children }) => {
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
   };
