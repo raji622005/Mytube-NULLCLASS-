@@ -83,23 +83,23 @@ const VideoCall = () => {
   };
 const endCall = () => {
   if (currentCall) {
-    currentCall.close(); // End the peer connection
+    currentCall.close(); 
     setCurrentCall(null);
 
-    // Stop all local tracks (video + audio)
+    
     const localStream = localVideoRef.current?.srcObject;
     if (localStream) {
       localStream.getTracks().forEach(track => {
-        track.stop(); // This stops the camera/mic
+        track.stop(); 
       });
       localVideoRef.current.srcObject = null;
     }
 
-    // Stop all remote tracks
+    
     const remoteStream = remoteVideoRef.current?.srcObject;
     if (remoteStream) {
       remoteStream.getTracks().forEach(track => {
-        track.stop(); // This helps release remote media too
+        track.stop();
       });
       remoteVideoRef.current.srcObject = null;
     }
