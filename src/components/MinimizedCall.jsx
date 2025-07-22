@@ -17,7 +17,12 @@ const MinimizedCall = () => {
   if (!isSharingScreen) return null;
 
   const handleClick = () => {
-    navigate('/video-call'); // or your exact route
+    const peerId = localStorage.getItem('activePeerId');
+    if (peerId) {
+      navigate(`/video-call/${peerId}`);
+    } else {
+      alert('No active call found.');
+    }
   };
 
   return (

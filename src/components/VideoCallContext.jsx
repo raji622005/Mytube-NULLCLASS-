@@ -1,5 +1,5 @@
 // src/components/VideoCallContext.jsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
 
 const VideoCallContext = createContext();
 

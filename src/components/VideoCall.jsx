@@ -9,6 +9,7 @@ const VideoCall = () => {
   const [callToId, setCallToId] = useState('');
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const [screenChunks, setScreenChunks] = useState([]);
   const [peerId, setPeerId] = useState('');
   const { isSharingScreen,localStream, setLocalStream, screenStream, setScreenStream, currentCall, setCurrentCall, setIsSharingScreen } = useVideoCall();
   const navigate=useNavigate();
@@ -16,7 +17,7 @@ const VideoCall = () => {
   const peerInstance = useRef(null);
    const [screenRecording, setScreenRecording] = useState(false);
   const screenRecorderRef = useRef(null);
-  const [screenChunks, setScreenChunks] = useState([]);
+  
   useEffect(() => {
     const getMedia = async () => {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -35,6 +36,7 @@ const VideoCall = () => {
     });
 
     peer.on('call', async (call) => {
+      localStorage.setItem('activePeerId', call.peer);
       call.answer(localStream);
       call.on('stream', (remote) => {
         setRemoteStream(remote);
@@ -43,15 +45,37 @@ const VideoCall = () => {
       currentCall.current = call;
     });
   }, []);
-  const callUser = () => {
-    if (!callToId || !localStream || !peerInstance.current) return;
-    const call = peerInstance.current.call(callToId, localStream);
+  const callUser = async () => {
+  if (!callToId || !peerInstance.current) return;
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    setLocalStream(stream); 
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
+    }
+
+    const call = peerInstance.current.call(callToId, stream);
+    localStorage.setItem('activePeerId', callToId);
+
     call.on('stream', (remote) => {
       setRemoteStream(remote);
       if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remote;
     });
+
+    call.on('close', () => {
+      // Stop all media on call close
+      stream.getTracks().forEach((track) => track.stop());
+      if (localVideoRef.current) localVideoRef.current.srcObject = null;
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    });
+
     currentCall.current = call;
-  };
+  } catch (err) {
+    console.error('Error accessing media devices:', err);
+  }
+};
+
 
  
   const startScreenShare = async () => {
@@ -77,6 +101,7 @@ const VideoCall = () => {
     }
   };
    const handleEndCall = () => {
+    localStorage.removeItem('activePeerId');
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop());
     }
@@ -142,7 +167,34 @@ const VideoCall = () => {
     console.error('Screen recording failed:', err);
   }
 };
+let mediaStream = null;
+
+const startMedia = async () => {
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = mediaStream;
+    }
+  } catch (err) {
+    console.error('Error starting media:', err);
+  }
+};
+const stopMedia = () => {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach((track) => track.stop());
+    mediaStream = null;
+  }
+
+  if (localVideoRef.current) {
+    localVideoRef.current.srcObject = null;
+  }
+
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = null;
+  }
+};
 const stopScreenRecording = () => {
+  stopMedia();
   if (screenRecorderRef.current) {
     screenRecorderRef.current.stop();
     setScreenRecording(false);
@@ -151,61 +203,95 @@ const stopScreenRecording = () => {
 
   return (
     <div className="video-call-container">
-      <h2 >Video Call</h2>
-      <h4 className="peer-id" style={{color:'lightsalmon'}}>Peer Id:     {peerId || 'Re-Load page'}</h4>
-      <div style={{ display: 'flex', gap: '20px' }}>
-        <div>
-          <input
-    type="text"
-    placeholder="Enter peer ID to call"
-    value={callToId}
-    className="input-call-id"
-    onChange={(e) => setCallToId(e.target.value)}
-    style={{
-      padding: '8px',
-      marginTop: '10px',
-      borderRadius: '5px',
-      border: '1px solid #ccc',
-      width: '250px',
-      marginRight: '10px',
-    }}
-  />
+      <h2 className='video-call-title'>Video Call</h2>
+      <h4 className="peer-id" style={{ color: 'lightsalmon' }}>
+        Peer Id: {peerId || 'Re-Load page'}
+      </h4>
+
+      <input
+        type="text"
+        placeholder="Enter peer ID to call"
+        value={callToId}
+        className="input-call-id"
+        onChange={(e) => setCallToId(e.target.value)}
+        style={{
+          padding: '8px',
+          marginTop: '10px',
+          borderRadius: '5px',
+          border: '1px solid #ccc',
+          width: '250px',
+          marginBottom: '20px',
+        }}
+      />
+
+      <div className="video-container">
+        <div className="video-block">
           <h4 className="video-label">Local Video</h4>
-          <video ref={localVideoRef} autoPlay muted playsInline style={{ width: '300px', borderRadius: '10px' }} />
+          <video  ref={localVideoRef} autoPlay muted playsInline />
         </div>
-        <div>
-          <h4>Remote Video</h4>
-          <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '300px', borderRadius: '10px' }} />
+
+        <div className="video-block">
+          <h4 className="video-label">Remote Video</h4>
+          <video className="video-element" ref={remoteVideoRef} autoPlay playsInline />
         </div>
       </div>
-      <button className="button red" onClick={startScreenShare} style={{ marginTop: '20px' }}>
-        {isSharingScreen ? 'Sharing...' : 'Share Screen'}
-      </button>
-      <button onClick={callUser} className="button red">Call</button>
-      <button onClick={startScreenRecording} className="button red" style={{ margin: '10px', padding: '10px', backgroundColor: '#2196F3', color: '#fff', borderRadius: '5px', border: 'none' }}>Start Screen Recording</button>
-      <button onClick={stopScreenRecording} className="button red" style={{ margin: '10px', padding: '10px', backgroundColor: '#f44336', color: '#fff', borderRadius: '5px', border: 'none' }}>Stop Screen Recording</button>
-      <button
-      className="end-call-button"
-      onClick={handleEndCall}
-      style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        backgroundColor: 'red',
-        color: 'white',
-        padding: '10px 20px',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        zIndex: 10000,
-      }}>End Call</button>
 
+      <div className="controls">
+        <button className="share-btn" onClick={startScreenShare}>
+          {isSharingScreen ? 'Sharing...' : 'Share Screen'}
+        </button>
+        <button className="call-btn" onClick={callUser}>
+          Call
+        </button>
+        <button
+          onClick={startScreenRecording}
+          className="button"
+          style={{
+            backgroundColor: '#2196F3',
+            color: '#fff',
+            borderRadius: '5px',
+            marginLeft: '10px',
+          }}
+        >
+          Start Screen Recording
+        </button>
+        <button
+          onClick={stopScreenRecording}
+          className="stop-recording-btn"
+          style={{
+            backgroundColor: '#f44336',
+            color: '#fff',
+            borderRadius: '5px',
+            marginLeft: '10px',
+          }}
+        >
+          Stop Screen Recording
+        </button>
+      </div>
+
+      <button
+        className="end-call-btn"
+        onClick={handleEndCall}
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: 'red',
+          color: 'white',
+          padding: '10px 20px',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          zIndex: 10000,
+        }}
+      >
+        End Call
+      </button>
 
       <MinimizedCall />
     </div>
-  );
+)
 };
-
 export default VideoCall;
