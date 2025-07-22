@@ -57,7 +57,7 @@ const Navigation = ({ toggleSidebar }) => {
   }, []);
     const handleVideoCallClick = () => {
     if (currentUser) {
-      navigate('/video-call');
+      window.open('/video-call', '_blank', 'width=800,height=600');
     } else {
       navigate('/auth'); // redirect to login/signup
     }
