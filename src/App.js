@@ -10,6 +10,7 @@ import Shorts from './pages/shorts.jsx';
 import Subscription from './pages/Subscription.jsx';
 import History from './pages/History.jsx';
 import Playlist from './pages/playlist.jsx';
+import MinimizedCall from './components/MinimizedCall.jsx';
 import WatchLater from './pages/WatchLater.jsx';
 import LikedVideos from './pages/LikedVideos.jsx';
 import Settings from './pages/Settings.jsx';
@@ -31,6 +32,7 @@ const Layout = ({ children }) => {
   return (
     <>
       <Navigation toggleSidebar={toggleSidebar} />
+      <MinimizedCall/>
       <div className="layout">
         {showSidebar && <Side showSidebar={showSidebar} />}
         <div className={`MainContent ${showSidebar ? 'with-sidebar' : 'full-width'}`}>

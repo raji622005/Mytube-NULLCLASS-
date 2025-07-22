@@ -10,11 +10,13 @@ import { WatchLaterProvider } from './components/WatchLaterContext';
 import { BrowserRouter } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
 import store from './redux/store';
+import { VideoCallProvider } from './components/VideoCallContext';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}> 
     <Provider store={store}>
+      <VideoCallProvider>
       <WatchLaterProvider>
       <SubscribeProvider>
       <LikedVideosProvider>
@@ -24,6 +26,7 @@ root.render(
       </LikedVideosProvider> 
       </SubscribeProvider>  
       </WatchLaterProvider>
+      </VideoCallProvider>
       </Provider>
     </BrowserRouter>
   </React.StrictMode>

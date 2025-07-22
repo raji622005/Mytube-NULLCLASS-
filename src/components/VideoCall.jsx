@@ -1,228 +1,210 @@
+// src/components/VideoCall.jsx
 import React, { useEffect, useRef, useState } from 'react';
+import { useVideoCall } from './VideoCallContext';
+import MinimizedCall from './MinimizedCall';
+import { Navigate, useNavigate } from 'react-router-dom';
 import Peer from './peer.jsx';
-import './VideoCall.css';
 const VideoCall = () => {
-  const localVideoRef = useRef();
-  const remoteVideoRef = useRef();
+  const [callToId, setCallToId] = useState('');
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
   const [peerId, setPeerId] = useState('');
-  const [myPeer, setMyPeer] = useState(null);
-  const [currentCall, setCurrentCall] = useState(null);
-  const peerConnectionRef = useRef(null); 
-  const localStreamRef = useRef(null);   
-  const senderRef = useRef(null);   
-  const mediaRecorderRef = useRef(null);
-  const recordedChunksRef = useRef([]);
+  const { isSharingScreen,localStream, setLocalStream, screenStream, setScreenStream, currentCall, setCurrentCall, setIsSharingScreen } = useVideoCall();
+  const navigate=useNavigate();
+  const [remoteStream, setRemoteStream] = useState(null);
+  const peerInstance = useRef(null);
+   const [screenRecording, setScreenRecording] = useState(false);
+  const screenRecorderRef = useRef(null);
+  const [screenChunks, setScreenChunks] = useState([]);
   useEffect(() => {
-    const savedPeerId = sessionStorage.getItem("myPeerId");
-    const savedRemotePeerId = sessionStorage.getItem("remotePeerId");
+    const getMedia = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setLocalStream(stream);
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+    };
+
+    getMedia();
+
     const peer = Peer;
-    setMyPeer(peer);
+    peerInstance.current = peer;
 
     peer.on('open', (id) => {
       setPeerId(id);
-      sessionStorage.setItem("myPeerId", id);
-      console.log("My Peer ID:", id);
-
-      if (savedRemotePeerId) {
-        callPeer(savedRemotePeerId, peer);
-      }
+      console.log('My peer ID is:', id);
     });
 
-    peer.on('call', (call) => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Your browser does not support video call features.");
-        return;
-      }
-
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          localVideoRef.current.srcObject = stream;
-          localVideoRef.current.play();
-          call.answer(stream);
-          setCurrentCall(call);
-          localStreamRef.current = stream;
-
-          call.on('stream', (remoteStream) => {
-            remoteVideoRef.current.srcObject = remoteStream;
-            remoteVideoRef.current.play();
-          });
-
-          call.on('close', () => {
-            console.log("Call ended");
-            remoteVideoRef.current.srcObject = null;
-            sessionStorage.removeItem("remotePeerId");
-          });
-        })
-        .catch((err) => {
-          console.error("Failed to access webcam:", err);
-        });
+    peer.on('call', async (call) => {
+      call.answer(localStream);
+      call.on('stream', (remote) => {
+        setRemoteStream(remote);
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remote;
+      });
+      currentCall.current = call;
     });
   }, []);
-
-  const callPeer = (idToCall) => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Your browser does not support video call features.");
-      return;
-    }
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        localVideoRef.current.srcObject = stream;
-        localVideoRef.current.play();
-
-        const call = myPeer.call(idToCall, stream);
-        setCurrentCall(call);
-
-        call.on('stream', (remoteStream) => {
-          remoteVideoRef.current.srcObject = remoteStream;
-          remoteVideoRef.current.play();
-        });
-
-        call.on('close', () => {
-          console.log("Call ended");
-          remoteVideoRef.current.srcObject = null;
-          sessionStorage.removeItem("remotePeerId")
-        });
-        sessionStorage.setItem("remotePeerId", idToCall)
-      })
-      .catch((err) => {
-        console.error("Failed to start call:", err);
-      });
-      window.dispatchEvent(new CustomEvent("videoCallStarted", {
-    detail: { timestamp: Date.now() }
-}));
+  const callUser = () => {
+    if (!callToId || !localStream || !peerInstance.current) return;
+    const call = peerInstance.current.call(callToId, localStream);
+    call.on('stream', (remote) => {
+      setRemoteStream(remote);
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remote;
+    });
+    currentCall.current = call;
   };
-const endCall = () => {
-  if (currentCall) {
-    currentCall.close(); 
-    setCurrentCall(null);
 
-    
-    const localStream = localVideoRef.current?.srcObject;
+ 
+  const startScreenShare = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      setIsSharingScreen(true);
+      setLocalStream(screenStream);
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = screenStream;
+      }
+
+      screenStream.getVideoTracks()[0].onended = () => {
+        setIsSharingScreen(false);
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((camStream) => {
+          setLocalStream(camStream);
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = camStream;
+          }
+        });
+      };
+    } catch (err) {
+      console.error('Error sharing screen:', err);
+    }
+  };
+   const handleEndCall = () => {
     if (localStream) {
-      localStream.getTracks().forEach(track => {
-        track.stop(); 
-      });
-      localVideoRef.current.srcObject = null;
+      localStream.getTracks().forEach((track) => track.stop());
     }
 
-    
-    const remoteStream = remoteVideoRef.current?.srcObject;
-    if (remoteStream) {
-      remoteStream.getTracks().forEach(track => {
-        track.stop();
-      });
-      remoteVideoRef.current.srcObject = null;
+    if (currentCall) {
+      currentCall.close();
     }
-    sessionStorage.removeItem("remotePeerId"); 
-    console.log("✅ Call ended & all media tracks stopped");
-  }
-};
-const shareScreen = async () => {
+
+    if (screenStream) {
+      screenStream.getTracks().forEach((track) => track.stop());
+    }
+
+    setCurrentCall(null);
+    setIsSharingScreen(false);
+    setLocalStream(null);
+    setScreenStream(null);
+    navigate('/');
+  };
+  const startScreenRecording = async () => {
   try {
-    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-    const screenTrack = screenStream.getVideoTracks()[0];
+    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
 
-    if (!screenTrack) {
-      console.error("No screen video track found.");
-      return;
-    }
+    const recorder = new MediaRecorder(screenStream, { mimeType: 'video/webm' });
+    screenRecorderRef.current = recorder;
+    setScreenChunks([]);
 
-    // Replace video track in PeerConnection sender
-    if (currentCall?.peerConnection) {
-      const sender = currentCall.peerConnection
-        .getSenders()
-        .find((s) => s.track && s.track.kind === 'video');
-
-      if (sender) {
-        senderRef.current = sender;
-        await sender.replaceTrack(screenTrack); 
-    }
-
-    localVideoRef.current.srcObject = screenStream;
-
-    
-    screenTrack.onended = async () => {
-      const originalStream = localStreamRef.current;
-      const originalVideoTrack = originalStream?.getVideoTracks()[0];
-
-      if (senderRef.current && originalVideoTrack) {
-        await senderRef.current.replaceTrack(originalVideoTrack);
-        localVideoRef.current.srcObject = originalStream;
-      }
-    }
-    };
-  } catch (err) {
-    console.error("Error sharing screen:", err);
-  }
-};
-
-  const startRecording = () => {
-    const stream = localVideoRef.current?.srcObject;
-    if (!stream) {
-      alert("No stream available to record.");
-      return;
-    }
-
-    recordedChunksRef.current = [];
-
-    const options = { mimeType: 'video/webm; codecs=vp9' };
-    const mediaRecorder = new MediaRecorder(stream, options);
-
-    mediaRecorder.ondataavailable = (event) => {
+    recorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
-        recordedChunksRef.current.push(event.data);
+        setScreenChunks((prev) => [...prev, event.data]);
       }
     };
 
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+    recorder.onstop = () => {
+      const blob = new Blob(screenChunks, { type: 'video/webm' });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement('a');
-      a.style.display = 'none';
       a.href = url;
-      a.download = 'recorded-session.webm';
+      a.download = 'screen-recording.webm';
+
+      // ✅ Inline CSS for the download link
+      a.style.display = 'inline-block';
+      a.style.padding = '10px 16px';
+      a.style.backgroundColor = '#4CAF50';
+      a.style.color = 'white';
+      a.style.textDecoration = 'none';
+      a.style.borderRadius = '6px';
+      a.style.fontSize = '16px';
+      a.style.marginTop = '20px';
+
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     };
 
-    mediaRecorder.start();
-    mediaRecorderRef.current = mediaRecorder;
-    console.log("🎥 Recording started");
-  };
+    recorder.start();
+    setScreenRecording(true);
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      console.log("🛑 Recording stopped and saved");
-    }
-  };
+    // Automatically stop recording when screen sharing is manually stopped
+    screenStream.getVideoTracks()[0].onended = () => stopScreenRecording();
+  } catch (err) {
+    console.error('Screen recording failed:', err);
+  }
+};
+const stopScreenRecording = () => {
+  if (screenRecorderRef.current) {
+    screenRecorderRef.current.stop();
+    setScreenRecording(false);
+  }
+};
+
   return (
-  <div className="video-call-container">
-    <h2 className="video-call-header">Your Peer ID: {peerId}</h2>
-
-    <div className="control-bar">
-      <input type="text" placeholder="Enter Peer ID to call" id="peerIdInput" />
-      <button onClick={() => callPeer(document.getElementById("peerIdInput").value)}>
-        Call
+    <div>
+      <h2>Video Call</h2>
+      <div style={{ display: 'flex', gap: '20px' }}>
+        <div>
+          <input
+    type="text"
+    placeholder="Enter peer ID to call"
+    value={callToId}
+    onChange={(e) => setCallToId(e.target.value)}
+    style={{
+      padding: '8px',
+      marginTop: '10px',
+      borderRadius: '5px',
+      border: '1px solid #ccc',
+      width: '250px',
+      marginRight: '10px',
+    }}
+  />
+          <h4>Local Video</h4>
+          <video ref={localVideoRef} autoPlay muted playsInline style={{ width: '300px', borderRadius: '10px' }} />
+        </div>
+        <div>
+          <h4>Remote Video</h4>
+          <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '300px', borderRadius: '10px' }} />
+        </div>
+      </div>
+      <button onClick={startScreenShare} style={{ marginTop: '20px' }}>
+        {isSharingScreen ? 'Sharing...' : 'Share Screen'}
       </button>
-      <button onClick={endCall} className="end-call">
-        End Call
-      </button>
-      <button onClick={shareScreen}>Share Screen</button>
-      <button onClick={startRecording}>Start Recording</button>
-      <button onClick={stopRecording}>Stop Recording</button>
-    </div>
+      <button onClick={callUser}>Call</button>
+      <button onClick={startScreenRecording} style={{ margin: '10px', padding: '10px', backgroundColor: '#2196F3', color: '#fff', borderRadius: '5px', border: 'none' }}>Start Screen Recording</button>
+      <button onClick={stopScreenRecording} style={{ margin: '10px', padding: '10px', backgroundColor: '#f44336', color: '#fff', borderRadius: '5px', border: 'none' }}>Stop Screen Recording</button>
+      <button
+  onClick={handleEndCall}
+  style={{
+    position: 'absolute',
+    bottom: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'red',
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    zIndex: 10000,
+  }}
+>
+  End Call
+</button>
 
-    <div className="video-preview">
-      <video ref={localVideoRef} muted autoPlay playsInline></video>
-      <video ref={remoteVideoRef} autoPlay playsInline></video>
-    </div>
-  </div>
-);
 
+      <MinimizedCall />
+    </div>
+  );
 };
 
 export default VideoCall;
