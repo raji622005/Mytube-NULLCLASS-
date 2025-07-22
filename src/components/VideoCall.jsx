@@ -4,6 +4,7 @@ import { useVideoCall } from './VideoCallContext';
 import MinimizedCall from './MinimizedCall';
 import { Navigate, useNavigate } from 'react-router-dom';
 import Peer from './peer.jsx';
+import './VideoCall.css';
 const VideoCall = () => {
   const [callToId, setCallToId] = useState('');
   const localVideoRef = useRef(null);
@@ -149,14 +150,16 @@ const stopScreenRecording = () => {
 };
 
   return (
-    <div>
-      <h2>Video Call</h2>
+    <div className="video-call-container">
+      <h2 >Video Call</h2>
+      <h4 className="peer-id" style={{color:'lightsalmon'}}>Peer Id:     {peerId || 'Re-Load page'}</h4>
       <div style={{ display: 'flex', gap: '20px' }}>
         <div>
           <input
     type="text"
     placeholder="Enter peer ID to call"
     value={callToId}
+    className="input-call-id"
     onChange={(e) => setCallToId(e.target.value)}
     style={{
       padding: '8px',
@@ -167,7 +170,7 @@ const stopScreenRecording = () => {
       marginRight: '10px',
     }}
   />
-          <h4>Local Video</h4>
+          <h4 className="video-label">Local Video</h4>
           <video ref={localVideoRef} autoPlay muted playsInline style={{ width: '300px', borderRadius: '10px' }} />
         </div>
         <div>
@@ -175,31 +178,29 @@ const stopScreenRecording = () => {
           <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '300px', borderRadius: '10px' }} />
         </div>
       </div>
-      <button onClick={startScreenShare} style={{ marginTop: '20px' }}>
+      <button className="button red" onClick={startScreenShare} style={{ marginTop: '20px' }}>
         {isSharingScreen ? 'Sharing...' : 'Share Screen'}
       </button>
-      <button onClick={callUser}>Call</button>
-      <button onClick={startScreenRecording} style={{ margin: '10px', padding: '10px', backgroundColor: '#2196F3', color: '#fff', borderRadius: '5px', border: 'none' }}>Start Screen Recording</button>
-      <button onClick={stopScreenRecording} style={{ margin: '10px', padding: '10px', backgroundColor: '#f44336', color: '#fff', borderRadius: '5px', border: 'none' }}>Stop Screen Recording</button>
+      <button onClick={callUser} className="button red">Call</button>
+      <button onClick={startScreenRecording} className="button red" style={{ margin: '10px', padding: '10px', backgroundColor: '#2196F3', color: '#fff', borderRadius: '5px', border: 'none' }}>Start Screen Recording</button>
+      <button onClick={stopScreenRecording} className="button red" style={{ margin: '10px', padding: '10px', backgroundColor: '#f44336', color: '#fff', borderRadius: '5px', border: 'none' }}>Stop Screen Recording</button>
       <button
-  onClick={handleEndCall}
-  style={{
-    position: 'absolute',
-    bottom: '20px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: 'red',
-    color: 'white',
-    padding: '10px 20px',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    zIndex: 10000,
-  }}
->
-  End Call
-</button>
+      className="end-call-button"
+      onClick={handleEndCall}
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontSize: '16px',
+        zIndex: 10000,
+      }}>End Call</button>
 
 
       <MinimizedCall />
