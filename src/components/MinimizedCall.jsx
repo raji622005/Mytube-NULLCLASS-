@@ -17,9 +17,9 @@ const MinimizedCall = () => {
   if (!isSharingScreen) return null;
 
   const handleClick = () => {
-    const peerId = localStorage.getItem('activePeerId');
-    if (peerId) {
-      navigate(`/video-call/${peerId}`);
+    const callId = localStorage.getItem('receiverPeerId');
+    if (callId) {
+      navigate(`/video-call?peerId=${callId}`);
     } else {
       alert('No active call found.');
     }
@@ -58,4 +58,3 @@ const MinimizedCall = () => {
 };
 
 export default MinimizedCall;
-
